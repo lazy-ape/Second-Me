@@ -27,6 +27,7 @@ from lpm_kernel.kernel.l1.l1_manager import generate_l1_from_l0
 import threading
 from lpm_kernel.api.domains.trainprocess.progress_enum import Status
 from lpm_kernel.api.domains.trainprocess.train_progress import TrainProgress
+from lpm_kernel.api.domains.trainprocess.process_step import ProcessStep
 import gc
 import subprocess
 import shlex
@@ -34,56 +35,19 @@ import shlex
 from lpm_kernel.configs.logging import get_train_process_logger, TRAIN_LOG_FILE
 logger = get_train_process_logger()
 
-class ProcessStep(Enum):
-    """Training process steps"""
-
-    LIST_DOCUMENTS = "list_documents"
-    GENERATE_DOCUMENT_EMBEDDINGS = "generate_document_embeddings"
-    CHUNK_DOCUMENT = "process_chunks"
-    CHUNK_EMBEDDING = "chunk_embedding"
-    EXTRACT_DIMENSIONAL_TOPICS = "extract_dimensional_topics"
-    GENERATE_BIOGRAPHY = "generate_biography"
-    MODEL_DOWNLOAD = "model_download"
-    MAP_ENTITY_NETWORK = "map_your_entity_network"
-    DECODE_PREFERENCE_PATTERNS = "decode_preference_patterns"
-    REINFORCE_IDENTITY = "reinforce_identity"
-    AUGMENT_CONTENT_RETENTION = "augment_content_retention"
-    TRAIN = "train"
-    MERGE_WEIGHTS = "merge_weights"
-    CONVERT_MODEL = "convert_model"
-
-    @classmethod
-    def get_ordered_steps(cls) -> List["ProcessStep"]:
-        """Get ordered steps"""
-        return [
-            cls.MODEL_DOWNLOAD,
-            cls.LIST_DOCUMENTS,
-            cls.GENERATE_DOCUMENT_EMBEDDINGS,
-            cls.CHUNK_DOCUMENT,
-            cls.CHUNK_EMBEDDING,
-            cls.EXTRACT_DIMENSIONAL_TOPICS,
-            cls.GENERATE_BIOGRAPHY,
-            cls.MAP_ENTITY_NETWORK,
-            cls.DECODE_PREFERENCE_PATTERNS,
-            cls.REINFORCE_IDENTITY,
-            cls.AUGMENT_CONTENT_RETENTION,
-            cls.TRAIN,
-            cls.MERGE_WEIGHTS,
-            cls.CONVERT_MODEL,
-        ]
-        
-    def get_method_name(self) -> str:
-        """Get the corresponding method name for this step"""
-        return self.value
-
-
 class TrainProgressHolder:
     """Progress management class"""
 
-    def __init__(self, progress_file: str):
+    def __init__(self, model_name: str = None):
         progress_dir = os.path.join(os.getcwd(), "data", "progress")
         if not os.path.exists(progress_dir):
             os.makedirs(progress_dir)
+        
+        # Generate progress file name based on model name
+        progress_file = "trainprocess_progress.json"  # Default name
+        if model_name:
+            progress_file = f"trainprocess_progress_{model_name}.json"
+            
         self.progress_file = os.path.normpath(os.path.join(progress_dir, progress_file))
         if not self.progress_file.startswith(progress_dir):
             raise ValueError("Invalid progress file path")
@@ -230,15 +194,11 @@ class TrainProcessService:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, base_url: str = None, progress_file: str = None, current_model_name: str = None, is_cot: bool = False):
+    def __init__(self, current_model_name: str = None, is_cot: bool = False):
         if not self._initialized:
-            config = Config.from_env()
-            self.base_url = base_url or config.KERNEL2_SERVICE_URL
             # Generate a unique progress file name based on model name
-            if current_model_name:
-                progress_file = f"trainprocess_progress_{current_model_name}.json"
-            self.progress = TrainProgressHolder(progress_file)
-            self.model_name = None  # Initialize as None
+            self.progress = TrainProgressHolder(current_model_name)
+            self.model_name = current_model_name  # Set model name directly
             self._initialized = True
             
             # Initialize stop flag
@@ -261,8 +221,7 @@ class TrainProcessService:
         if current_model_name is not None and current_model_name != self.model_name:
             self.model_name = current_model_name
             # Create new progress instance with updated progress file name
-            progress_file = f"trainprocess_progress_{current_model_name}.json"
-            self.progress = TrainProgressHolder(progress_file)
+            self.progress = TrainProgressHolder(current_model_name)
         self.is_cot = is_cot
 
     def list_documents(self):
@@ -598,7 +557,7 @@ class TrainProcessService:
 
     def _prepare_l2_data(self) -> dict:
         """Prepare common data needed for L2 generation tasks using lazy loading
-        
+
         Returns:
             Dictionary containing all L2 data:
             - notes: List of prepared notes
@@ -613,9 +572,9 @@ class TrainProcessService:
         if self.l2_data_prepared and all(self.l2_data.values()):
             logger.info("Using cached L2 data")
             return self.l2_data
-        
+
         logger.info("Preparing L2 data...")
-        
+
         # Setup directories and paths
         config = Config.from_env()
         base_dir = os.path.join(
@@ -666,16 +625,15 @@ class TrainProcessService:
             "username": LoadService.get_current_upload_name(),
             "aboutMe": LoadService.get_current_upload_description(),
             "statusBio": status_bio.content if status_bio else "Currently working on an AI project.",
-            "globalBio": global_bio.content_third_view if global_bio 
+            "globalBio": global_bio.content_third_view if global_bio
                 else "The User is a software engineer who loves programming and learning new technologies.",
             "lang": "English",
         }
-        
+
         # Mark data as prepared
         self.l2_data_prepared = True
-        
-        return self.l2_data
 
+        return self.l2_data
     def train(self) -> bool:
         """Start model training"""
         try:
