@@ -7,7 +7,6 @@ from flask import Blueprint, jsonify, Response, request
 from charset_normalizer import from_path
 
 from lpm_kernel.file_data.trainprocess_service import TrainProcessService
-from .progress import Status
 from ...common.responses import APIResponse
 from threading import Thread
 

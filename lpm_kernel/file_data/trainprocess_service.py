@@ -25,7 +25,7 @@ from lpm_kernel.configs.config import Config
 from lpm_kernel.file_data.chunker import DocumentChunker
 from lpm_kernel.kernel.l1.l1_manager import generate_l1_from_l0
 import threading
-from ..api.domains.trainprocess.progress import TrainProgress, Status
+from ..api.domains.trainprocess.progress_enum import TrainProgress, Status
 import gc
 import subprocess
 import shlex
