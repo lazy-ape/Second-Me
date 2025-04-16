@@ -1,12 +1,9 @@
-import json
-import os
 import time
-from pathlib import Path
 from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, Response, request
 from charset_normalizer import from_path
 
-from lpm_kernel.file_data.trainprocess_service import TrainProcessService
+from lpm_kernel.train.trainprocess_service import TrainProcessService
 from ...common.responses import APIResponse
 from threading import Thread
 
