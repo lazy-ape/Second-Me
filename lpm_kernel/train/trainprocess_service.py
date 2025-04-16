@@ -131,8 +131,7 @@ class TrainProgressHolder:
                         self.progress.steps_map[stage_name] = {}
                         for step in stage["steps"]:
                             step_name = step["name"].lower().replace(" ", "_")
-                            self.progress.steps_map[stage_name][step_name] = step
-                    
+                            self.progress.steps_map[stage_name][step_name] = step                    
                     # Check and reset any in_progress status to failed
                     self._reset_in_progress_status()
             except Exception as e:
@@ -177,8 +176,6 @@ class TrainProgressHolder:
         progress_dict = self.progress.to_dict()
         with open(self.progress_file, "w") as f:
             json.dump(progress_dict, f, indent=2)
-
-
 
     def is_step_completed(self, step: ProcessStep) -> bool:
         """Check if a step is completed"""
