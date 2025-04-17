@@ -85,6 +85,13 @@ class TrainingParamsManager:
             try:
                 with open(params_file, 'r', encoding='utf-8') as f:
                     params = json.load(f)
+                
+                # Replace null values with default values
+                default_params = cls._default_training_params.copy()
+                for key, value in default_params.items():
+                    if key not in params or params[key] is None:
+                        params[key] = value
+                
                 logger.debug(f"Loaded training parameters from {params_file}")
                 return params
             except Exception as e:
