@@ -172,7 +172,7 @@ class EntityWiki:
 
 class L1Generator:
     def __init__(self):
-        self.preferred_language = "English"
+        self.preferred_language = "Chinese"
         self.bio_model_params = {
             "temperature": 0,
             "max_tokens": 2000,

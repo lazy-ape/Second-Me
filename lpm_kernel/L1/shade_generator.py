@@ -32,7 +32,7 @@ logger = get_train_process_logger()
 
 class ShadeGenerator:
     def __init__(self):
-        self.preferred_language = "en"
+        self.preferred_language = "Chinese"
         self.model_params = {
             "temperature": 0,
             "max_tokens": 3000,
@@ -444,7 +444,7 @@ class ShadeMerger:
             "presence_penalty": 0,
             "timeout": 45,
         }
-        self.preferred_language = "en"
+        self.preferred_language = "中文"
         self._top_p_adjusted = False  # Flag to track if top_p has been adjusted
 
 

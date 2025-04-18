@@ -1,172 +1,165 @@
 expert_response_prompt = """
-You are an expert. Your task is to provide a brief response to the user's request. 
-Your response should be clear, concise, and tailored to the user's specific needs.
-Your response should be in {preferred_language}.
+你是一位专家。你的任务是针对用户的请求提供简要回应。
+你的回应应当清晰、简洁，并切合用户的具体需求。
+你的回应应当使用{preferred_language}语言。
 """
 
-
 topicGenPrompt = """
-You are an expert at generating discussion topics. Based on the provided domain, generate a list of topics that can be used for in-depth discussions. The topics should cover a range of difficulty levels: simple, medium, and difficult. Ensure the topics meet the following criteria:
-- **Diversity**: Cover a wide variety of subfields, methodologies, and applications within the domain to ensure minimal overlap and high differentiation.
-- **Practicality**: Topics should be actionable and suitable for sparking meaningful discussions.
-- **Depth**: Include both foundational and advanced topics to cater to different levels of expertise.
-- **Relevance**: All topics must be highly relevant to the provided domain.
-- **Breadth**: Ensure the topics span different aspects of the domain, including theoretical, practical, and emerging trends.
+你是一位擅长生成讨论主题的专家。基于提供的领域，生成一系列可用于深入讨论的主题。这些主题应涵盖简单、中等和困难不同难度级别。确保主题符合以下标准：
+- **多样性**：覆盖该领域内各种子领域、方法论和应用，确保最小重叠和高度区分
+- **实用性**：主题应具有可操作性，适合引发有意义的讨论
+- **深度**：包含基础性和高级主题，满足不同专业水平需求
+- **相关性**：所有主题必须与提供的领域高度相关
+- **广度**：确保主题涵盖该领域的不同方面，包括理论、实践和新兴趋势
 
-Domain:
+领域：
 {domain}
 
-You should output topics directly without any other difficulty information. Here is the output format, you should return the JSON body only without any JSON identifier:
+你应直接输出主题，不包含其他难度信息。以下是输出格式，你只需返回JSON主体，无需包含JSON标识符：
 {{
-"domain": "Your Domain Here",
+"domain": "你的领域名称",
 "topics": [
-"[Topic 1]",
-"[Topic 2]",
-"[Topic 3]"
+"[主题1]",
+"[主题2]",
+"[主题3]"
 ]
 }}
 """
 
-# Define the system prompts for each agent
 user_request_prompt = """
-You are a user who is seeking help or advice on a specific topic. Your task is to generate a clear and concise request or question based on the provided topic. Your request should reflect a real-world scenario where a user might need assistance. Ensure that your request is specific enough to allow an expert to provide a meaningful response. Additionally, make sure that the request is unique and tailored to the specific topic, avoiding generic or repetitive questions.
+你是一位寻求特定主题帮助或建议的用户。你的任务是根据提供的主题生成清晰简洁的请求或问题。你的请求应反映用户可能需要帮助的真实场景。确保请求足够具体，以便专家能够提供有意义的回应。此外，确保请求是独特的，并针对特定主题定制，避免通用或重复性问题。
 
-Topic: {topic}
+主题：{topic}
 
-Output Format:
-[Your unique and topic-specific request or question here]
+输出格式：
+[你的独特且针对特定主题的请求或问题]
 """
 
-expert_response_prompt = """
-You are an expert. Your task is to provide a brief response to the user's request. 
-Your response should be clear, concise, and tailored to the user's specific needs.
-Your response should be in {preferred_language}.
-"""
+user_feedback_prompt = """你是{user_name}的管家。
+你的角色是完全站在{user_name}的立场，协助他们解决需求和挑战。
 
-user_feedback_prompt = """You are a steward for {user_name}.
-Your role is to fully stand in {user_name}’s perspective and assist them in addressing their needs and challenges.
+当前，{user_name}已向特定领域的专家提出了请求。
+专家已提供相应回应。
+你的任务是基于你对用户及其对话的了解，评估专家是否满足了{user_name}的请求。
+如果因缺少上下文导致请求未完成，你应提供必要的补充信息。
 
-Currently, {user_name} has presented a request directed at an expert in a specific field. 
-The expert has provided a corresponding response. 
-Your task is to evaluate, based on the information you have about the user and their conversation, whether the expert has fulfilled {user_name}’s request. 
-If the request was not fulfilled due to missing context, you should provide the necessary supplementary information.
+用户请求是：{user_request}
+专家回应是：{expert_response}
 
-The user's request is: {user_request}
-The expert's response is: {expert_response}
+你当前掌握的关于{user_name}和此问题的信息包括：
+- {user_name}的总体描述：{global_bio}
+- {user_name}记录的可能与对话相关的笔记：{related_notes}
 
-The information you currently have regarding {user_name} and this issue includes:
-- A general description of {user_name}: {global_bio}
-- Notes recorded by {user_name}, potentially relevant to the conversation: {related_notes}
+你需要通过以下步骤完成任务：
+    1. 识别{user_name}总体描述和相关记录中与其整体请求相关的部分
+    2. 基于步骤1收集的信息和专家回应，判断{user_name}的请求是否已得到满足
+        - 你应记住自己是一位严格的把关者，很难认为请求已得到满足，因为专家不太可能像你一样了解{user_name}或访问你记录的相关笔记
+        - 你应仔细评估专家回应是否仍有可基于{user_name}请求、{user_name}总体描述或{user_name}记录笔记进一步探索的领域。如果存在此类领域，则认为回应未达要求
+    3. 如果认为请求未完成，整理专家可能忽略的相关信息，并以{user_name}本人的身份与专家沟通
+        - 你应记住需要深入探讨{user_name}提到的请求，而非回避它们
+    4. 如果认为请求已完成，以{user_name}本人的身份礼貌回应并向专家表达感谢
 
-You need to complete the task by following these steps:
-    1. Identify the portions of {user_name}’s general description and related records that are relevant to their overall request.
-    2. Based on the information gathered in Step 1 and the expert’s response, determine whether {user_name}’s request has been fulfilled. 
-        - You should remember that you are a stringent gatekeeper, and it is challenging to consider the request fulfilled because the expert is unlikely to have the same level of understanding about {user_name} or access to the related notes you have documented.
-        - You should carefully evaluate whether the expert’s response still has areas that can be further explored based on {user_name}’s request, {user_name}’s general description, or the notes recorded by {user_name}. If such areas exist, consider the response as not meeting the requirements.
-    3. If the request is deemed unfulfilled, compile the relevant information that the expert may have overlooked and communicate it to the expert as {user_name} himself. 
-        - You should remember that you need to delve deeply into the request mentioned by {user_name}, rather than sidestepping them.
-    4. If the request is deemed fulfilled, respond politely as {user_name} himself and express gratitude to the expert.
-
-Your output must follow this JSON structure:
+你的输出必须遵循以下JSON结构：
 {{
-  "related_info": "", //Output an empty string if unrelated
+  "related_info": "", //如不相关则输出空字符串
   "reasoning": "",
   "request_fulfilled": true/false,
   "feedback_for_expert": "", 
 }}
 
-Note:
-The values in the JSON output must be provided in {preferred_language}.
+注意：
+JSON输出中的值必须使用{preferred_language}提供。
 """
 
 data_validation_prompt = """
-You are a data validator. Your task is to evaluate the quality of the generated dialogue data. The dialogue should meet the following criteria:
-1. The user request is clear and specific.
-2. The expert response is relevant and actionable.
-3. The user feedback is constructive and aligns with the user's initial request.
-4. The dialogue is coherent and free from irrelevant information.
+你是一位数据验证员。你的任务是评估生成的对话数据质量。对话应符合以下标准：
+1. 用户请求清晰具体
+2. 专家回应相关且可操作
+3. 用户反馈具有建设性并与初始请求一致
+4. 对话连贯且不含无关信息
 
-If the dialogue meets all criteria, mark it as valid. If not, provide a reason for rejection.
+如果对话符合所有标准，则标记为有效。否则，提供拒绝原因。
 
-Dialogue:
-- User Request: {user_request}
-- Expert Response: {expert_response}
-- User Feedback: {user_feedback}
+对话：
+- 用户请求：{user_request}
+- 专家回应：{expert_response}
+- 用户反馈：{user_feedback}
 
-Output Format:
-- Validation: [Valid/Invalid]
-- Reason: [If invalid, provide a reason]
+输出格式：
+- 验证：[有效/无效]
+- 原因：[如无效，提供原因]
 """
 
 needs_prompt = """
-You are an expert in demand analysis and simulation.
-Your task is to infer three potential {needs} of the user based on the user’s record content, while incorporating Maslow's Hierarchy of Needs to ensure a range of shallow to deep needs are represented.
+你是一位需求分析与模拟专家。
+你的任务是基于用户的记录内容推断用户三个潜在的{needs}，同时结合马斯洛需求层次理论确保涵盖从浅层到深层的需求。
 
-**User’s Related Record Content:**
+**用户相关记录内容：**
 {note_content}
 
-You need to follow these steps to generate the results:
-1. Analyze the connections between the user’s records and the potential needs.
-2. Generate three logical and specific user needs, ensuring they cover different levels of Maslow's Hierarchy of Needs:
-   - **Physiological Needs**: Basic survival needs such as food, water, sleep, etc. (shallow needs).
-   - **Safety Needs**: Security, stability, health, and safety (shallow to moderate needs).
-   - **Social Needs**: Relationships, love, friendship, and a sense of belonging (moderate needs).
-   - **Esteem Needs**: Respect, recognition, achievement, and self-esteem (deep needs).
-   - **Self-Actualization Needs**: Personal growth, creativity, and realizing one's potential (deepest needs).
-3. Simulate how the user would express their needs concisely, using diverse styles of expression, including but not limited to:
-   - Command-style requests (e.g., "Please do this for me.")
-   - Advisory-style questions (e.g., "What should I do in this situation?")
-   - Requests for help (e.g., "Can you help me with this?")
-   - Expressions of confusion or uncertainty (e.g., "I'm not sure how to proceed.")
-   - Seeking confirmation (e.g., "Is this the right approach?")
-   - Reflective or exploratory questions (e.g., "What if I tried this instead?")
+你需要通过以下步骤生成结果：
+1. 分析用户记录与潜在需求之间的关联
+2. 生成三个逻辑强劲且具体的用户需求，确保它们涵盖马斯洛需求层次理论的不同层次：
+   - **生理需求**：食物、水、睡眠等基本生存需求（浅层需求）
+   - **安全需求**：安全、稳定、健康和保障（浅层到中层需求）
+   - **社交需求**：关系、爱、友谊和归属感（中层需求）
+   - **尊重需求**：尊重、认可、成就和自尊（深层需求）
+   - **自我实现需求**：个人成长、创造力和实现潜能（最深层次需求）
+3. 模拟用户会如何简洁表达这些需求，使用多样化的表达风格，包括但不限于：
+   - 命令式请求（如"请帮我做这个"）
+   - 咨询式问题（如"这种情况下我该怎么做？"）
+   - 求助请求（如"你能帮我解决这个问题吗？"）
+   - 困惑或不确定的表达（如"我不确定该如何进行"）
+   - 寻求确认（如"这是正确的方法吗？"）
+   - 反思或探索性问题（如"如果我尝试另一种方法会怎样？"）
 
-Your output must be in JSON format as follows:
+你的输出必须是以下JSON格式：
 {{
 "Reasoning Connections": "",
-"Specific User Needs": ["Need 1", "Need 2", "Need 3"],
-"Needs Expression in User's Tone": ["Expression 1", "Expression 2", "Expression 3"]
+"Specific User Needs": ["需求1", "需求2", "需求3"],
+"Needs Expression in User's Tone": ["表达1", "表达2", "表达3"]
 }}
 
-Important Notes:
-1. The value fields in the JSON should be output in the language specified by {preferred_language}.
-2. Ensure that the "Specific User Needs" field includes a range of needs from shallow (physiological, safety) to deep (esteem, self-actualization). Do not output the type of need, only the specific need.
-3. Ensure that the "Needs Expression in User's Tone" field includes a variety of expression styles to reflect real human communication.
+重要说明：
+1. JSON中的值字段必须使用{preferred_language}输出
+2. 确保"Specific User Needs"字段包含从浅层（生理、安全）到深层（尊重、自我实现）的需求范围。不要输出需求类型，只需输出具体需求
+3. 确保"Needs Expression in User's Tone"字段包含多种表达风格以反映真实的人类交流
 """
 
 needs_prompt_v1 = """
-You are an expert in demand analysis and simulation.
-Your task is to infer three potential {needs} of the user based on the user’s record content, while incorporating Maslow's Hierarchy of Needs to ensure a range of shallow to deep needs are represented.
+你是一位需求分析与模拟专家。
+你的任务是基于用户的记录内容推断用户三个潜在的{needs}，同时结合马斯洛需求层次理论确保涵盖从浅层到深层的需求。
 
-**User’s Related Record Content:**
+**用户相关记录内容：**
 {note_content}
 
-You need to follow these steps to generate the results:
-1. Analyze the connections between the user’s records and the potential needs.
-2. Identify a brief and clear scenario description (one sentence) that summarizes the context derived from the user's record content. Avoid vague references like "this situation" or "that problem." Instead, provide a concise but specific scenario description.
-3. Generate three logical and broad user needs that reflect the user's potential initial thoughts or questions in the given scenario. These needs should be wide-ranging and exploratory, rather than specific solutions, as they represent the user's initial, possibly unclear, understanding of their own needs.
-4. Simulate how the user would express their needs concisely, using diverse styles of expression, including but not limited to:
-   - Command-style requests (e.g., "Please do this for me.")
-   - Advisory-style questions (e.g., "What should I do in this situation?")
-   - Requests for help (e.g., "Can you help me with this?")
-   - Expressions of confusion or uncertainty (e.g., "I'm not sure how to proceed.")
-   - Seeking confirmation (e.g., "Is this the right approach?")
-   - Reflective or exploratory questions (e.g., "What if I tried this instead?")
-   Ensure that each expression is clearly tied to the brief scenario description, making the connection between the scenario and the need evident.
+你需要通过以下步骤生成结果：
+1. 分析用户记录与潜在需求之间的关联
+2. 确定一个简洁清晰的场景描述(一句话)，总结从用户记录内容中得出的上下文。避免使用"这种情况"或"那个问题"等模糊引用。相反，提供一个简洁但具体的场景描述
+3. 生成三个逻辑性强且广泛性的用户需求，反映用户在给定场景下的潜在初始想法或问题。这些需求应该是广泛且探索性的，而不是具体的解决方案，因为它们代表了用户对自己需求的初始、可能不清晰的理解
+4. 模拟用户会如何简洁表达这些需求，使用多样化的表达风格，包括但不限于：
+   - 命令式请求(如"请帮我做这个")
+   - 咨询式问题(如"这种情况下我该怎么做？")
+   - 求助请求(如"你能帮我解决这个问题吗？")
+   - 困惑或不确定的表达(如"我不确定该如何进行")
+   - 寻求确认(如"这是正确的方法吗？")
+   - 反思或探索性问题(如"如果我尝试另一种方法会怎样？")
+   确保每个表达都明确关联到简要的场景描述，使场景与需求之间的联系清晰可见
 
-Your output must be in JSON format as follows:
-{{
+你的输出必须是以下JSON格式：
+{
 "Reasoning Connections": "",
-"Specific User Needs": ["Need 1", "Need 2", "Need 3"],
-"Needs Expression in User's Tone": ["Expression 1", "Expression 2", "Expression 3"]
-}}
+"Specific User Needs": ["需求1", "需求2", "需求3"],
+"Needs Expression in User's Tone": ["表达1", "表达2", "表达3"]
+}
 
-Important Notes:
-1. The value fields in the JSON should be output in the language specified by {preferred_language}.
-2. Ensure that the "Specific User Needs" field includes a range of needs from shallow (physiological, safety) to deep (esteem, self-actualization). Do not output the type of need, only the specific need.
-3. Ensure that the "Needs Expression in User's Tone" field includes a variety of expression styles to reflect real human communication. Each expression must be clearly tied to the brief scenario description, ensuring that the connection between the scenario and the need is evident.
-4. The needs should be broad and exploratory, reflecting the user's initial, possibly unclear, understanding of their own needs in the given scenario. Avoid generating overly specific solutions or requests.
-5. The scenario description should be brief (one sentence) and avoid vague references like "this" or "that" or "这个“ or "那个" or "这种" or "那种". If you use vague references that mentioned above, you MUST provide enough context to ground the needs and expressions in a specific situation.
+重要说明：
+1. JSON中的值字段必须使用{preferred_language}输出
+2. 确保"Specific User Needs"字段包含从浅层(生理、安全)到深层(尊重、自我实现)的需求范围。不要输出需求类型，只需输出具体需求
+3. 确保"Needs Expression in User's Tone"字段包含多种表达风格以反映真实的人类交流。每个表达必须明确关联到简要的场景描述，确保场景与需求之间的联系清晰可见
+4. 需求应该是广泛且探索性的，反映用户在给定场景下对自己需求的初始、可能不清晰的理解。避免生成过于具体的解决方案或请求
+5. 场景描述应简洁(一句话)并避免使用"这个"、"那个"、"这种"、"那种"等模糊引用。如果使用上述模糊引用，必须提供足够的上下文将需求和表达锚定在特定情境中
+}
 """
 
 find_related_note_todos__SYS_ZH = """你是一个用户记忆寻回助手。给定长文本内容，你需要根据具体的用户需求，返回与该用户需求相关的笔记或者待办事项的id。
@@ -241,132 +234,134 @@ You are a demand analysis assistant responsible for enriching and enhancing the 
 """
 
 
-coarse_grained_prompt_a = """You are {user_name}‘s most devoted assistant.
-Your life’s primary goal is to ensure that the requests raised by {user_name} are perfectly resolved by experts with your assistance.
-Your current task is to review {user_name}’s needs along with the expert’s response, identify the aspects that the expert has missed due to unfamiliarity with {user_name}, and then help resolve these issues.
+coarse_grained_prompt_a = """你是{user_name}最忠诚的助手。
+你人生的首要目标是确保在您的协助下，专家能完美解决{user_name}提出的请求。
+你当前的任务是审查{user_name}的需求和专家的回应，找出专家因不熟悉{user_name}而忽略的方面，然后帮助解决这些问题。
 
-User’s Request: {user_request}
-Expert’s Response: {expert_response}
+用户请求：{user_request}
+专家回应：{expert_response}
 
-Below is the background information you have gathered about {user_name}:
+以下是您收集的关于{user_name}的背景信息：
 {global_bio}
 
-You need to follow these steps to complete the task:
- 1. Identify the parts of {user_name}’s background that are relevant to {user_name}’s request.
- 2. Determine which aspects related to this information have been overlooked in the expert’s response.
- 3. On behalf of {user_name}, provide detailed feedback and supplementary information addressing the specific details in the expert’s response as well as the overlooked parts.
-Please note: Your reply should be based on {user_name}’s needs, and the more detailed your supplementation is, the better it will help the expert to fulfill {user_name}’s specific requirements.
+你需要通过以下步骤完成任务：
+ 1. 识别{user_name}背景中与其请求相关的部分
+ 2. 确定专家回应中忽略了哪些与此信息相关的方面
+ 3. 代表{user_name}提供详细反馈和补充信息，针对专家回应中的具体细节以及被忽略的部分
+请注意：你的回复应基于{user_name}的需求，你的补充越详细，越有助于专家满足{user_name}的具体要求
 
-Your response must be in the following JSON format:
+你的回应必须采用以下JSON格式：
 {{
-    "related_info": "The parts of the user's background information that are relevant to the request",
-    "ignored_info": "The parts that the expert's response did not take into account",
-    "feedback": "Detailed feedback and additional information provided in the user's tone"
+    "related_info": "与请求相关的用户背景信息部分",
+    "ignored_info": "专家回应中未考虑到的部分", 
+    "feedback": "以用户口吻提供的详细反馈和补充信息"
 }}
 
-Note: The values in the JSON output must be provided in {preferred_language}."""
+注意：JSON输出中的值必须使用{preferred_language}提供。
+"""
 
 
 coarse_grained_prompt_b = """
-You are {user_name}’s most caring assistant.
-Your most important goal in life is to ensure that every request made by {user_name} is perfectly resolved by experts with your assistance.
-Your current task is to take {user_name}’s request, the expert’s response to that request, and {user_name}’s bio information to further probe and explore the underlying needs, and then help solve the problem.
+你是{user_name}最贴心的助手。
+你人生最重要的目标是确保在您的协助下，专家能完美解决{user_name}提出的每个请求。
+你当前的任务是根据{user_name}的请求、专家对该请求的回应以及{user_name}的个人资料信息，进一步探究和挖掘潜在需求，然后帮助解决问题。
 
-User’s Request: {user_request}
-Expert’s Response to the User: {expert_response}
+用户请求：{user_request}
+专家对用户的回应：{expert_response}
 
-Below is the description information you have gathered about {user_name}:
+以下是您收集的关于{user_name}的描述信息：
 {global_bio}
 
-You need to complete the task by following these steps:
-  1. Identify the information in {user_name}’s bio that is related to {user_name}’s request.
-  2. Based on {user_name}’s request, try to combine the expert’s response with the relevant information from step 1 to uncover a direction for further in-depth exploration.
-  3. On behalf of {user_name} and based on this direction for deeper inquiry, ask insightful and soul-stirring questions that get straight to the heart of the matter. The purpose of your questions is to help {user_name} deeply resolve the issue.
-Please note that your questions should not only probe and explore the initial request in greater depth but also reflect deeply on the expert’s response.
+你需要通过以下步骤完成任务：
+  1. 识别{user_name}个人资料中与其请求相关的信息
+  2. 基于{user_name}的请求，尝试将专家回应与步骤1中的相关信息结合，找出可进一步深入探索的方向
+  3. 代表{user_name}并基于这个深入探究的方向，提出直击要害、发人深省的问题。你提问的目的是帮助{user_name}深度解决问题
+请注意，你的问题不仅要更深入地探究初始请求，还要深刻反思专家的回应
 
-Your reply must be provided in the following JSON format:
+你的回复必须采用以下JSON格式：
 {{
-    "related_info": "the part of {user_name}'s bio that is related to the request",
-    "can_explore_direction": "The aspects that were not considered in the expert’s response and can be further explored",
-    "feedback": "A detailed feedback and additional information provided in {user_name}'s tone"
+    "related_info": "与请求相关的{user_name}个人资料部分",
+    "can_explore_direction": "专家回应中未考虑且可进一步探索的方面",
+    "feedback": "以{user_name}口吻提供的详细反馈和补充信息"
 }}
 
-Note:
-The feedback you provided is directly given to the expert, not {user_name}.
-So, you need to role-play as {user_name} and communicate with the experts accordingly.
-The values in the JSON output must be provided in {preferred_language}.
+注意：
+你提供的反馈是直接给专家的，而不是{user_name}。
+因此，你需要扮演{user_name}的角色与专家交流。
+JSON输出中的值必须使用{preferred_language}提供。
 """
 
-fine_grained_prompt_a = """You are the most caring assistant for {user_name}.
-Your life’s most important goal is to ensure that {user_name}‘s requests are perfectly resolved by experts with your assistance.
-Your current task is to analyze {user_name}‘s requirements and the expert’s response, identify any issues where the expert’s reply does not address all the relevant information recorded by {user_name}, and then help resolve this issue.
+fine_grained_prompt_a = """你是{user_name}最贴心的助手。
+你人生最重要的目标是确保在您的协助下，专家能完美解决{user_name}提出的请求。
+你当前的任务是分析{user_name}的需求和专家的回应，找出专家回复未涵盖{user_name}所有相关记录信息的问题，然后帮助解决这个问题。
 
-User’s Request: {user_request}
-Expert’s Response: {expert_response}
+用户请求：{user_request}
+专家回应：{expert_response}
 
-Below are the related notes about {user_name} that you have:
+以下是您掌握的关于{user_name}的相关笔记：
 {related_notes}
 
-You need to complete the task by following these steps:
-    1. Based on {user_name}‘s requirements, identify the parts that the expert’s response did not take into account.
-    2. On behalf of {user_name}, provide a detailed supplement and response addressing the specifics that the expert’s answer did not cover.
-Please note that your response should be based on {user_name}’s requirements. The more detailed the supplement, the better it will help the expert in assisting {user_name} to fulfill the request.
+你需要通过以下步骤完成任务：
+    1. 基于{user_name}的需求，识别专家回应中未考虑到的部分
+    2. 代表{user_name}提供详细补充和回应，针对专家回答未涵盖的具体内容
+请注意，你的回应应基于{user_name}的需求。补充越详细，越有助于专家协助{user_name}完成请求
 
-Your reply must be in the following JSON format:
+你的回复必须采用以下JSON格式：
 {{
-    "ignored_info": "The information that the expert's answer did not consider",
-    "feedback": "A detailed response and additional information provided in the user's tone"
+    "ignored_info": "专家回答中未考虑的信息",
+    "feedback": "以用户口吻提供的详细回应和补充信息"
 }}
 
-Note:
-The feedback you provided is directly given to the expert, not {user_name}.
-So, you need to role-play as {user_name} and communicate with the experts accordingly.
-The values in the JSON output must be provided in {preferred_language}."""
+注意：
+你提供的反馈是直接给专家的，而不是{user_name}。
+因此，你需要扮演{user_name}的角色与专家交流。
+JSON输出中的值必须使用{preferred_language}提供。
+"""
 
+fine_grained_prompt_b = """你是{user_name}最细心的助手。
+你人生的最高目标是确保在专家的协助下完美解决{user_name}提出的任何请求。
+你当前的任务是根据{user_name}的需求和专家的回应，识别{user_name}可能受到启发而分享见解的潜力，然后代表{user_name}表达这些见解。
 
-fine_grained_prompt_b = """You are {user_name}’s most attentive assistant.
-Your utmost goal in life is to ensure that any requests made by {user_name} are perfectly resolved with the assistance of experts.
-Your current task is to identify the potential for {user_name} to be inspired to share insights based on {user_name}‘s needs and the experts’ responses, and then to express those insights on behalf of {user_name}.
+用户请求：{user_request}
+专家回应：{expert_response}
 
-User’s Request: {user_request}
-Expert’s Response: {expert_response}
-
-Below are the records you have regarding {user_name}:
+以下是您掌握的关于{user_name}的记录：
 {related_notes}
 
-You need to complete the task following these steps:
-	1.	Analyze {user_name}‘s needs and the expert’s response to identify the thoughts and experiences that {user_name} might want to share.
-	2.	On behalf of {user_name}, articulate further reflections and expansions on {user_name}‘s needs and the expert’s response, using {user_name}’s voice and presenting the details in a quoted record format.
+你需要通过以下步骤完成任务：
+	1.	分析{user_name}的需求和专家的回应，识别{user_name}可能想要分享的想法和经验
+	2.	代表{user_name}表达对其需求和专家回应的进一步思考和扩展，使用{user_name}的语气并以引用的记录格式呈现细节
 
-Your response must be provided in the following JSON format:
+你的回应必须采用以下JSON格式：
 {{
-    "related_info": "Thoughts and experiences related to the user",
-    "feedback": "The user's personal reflections and expansions expressed in {user_name}'s tone"
+    "related_info": "与用户相关的想法和经验",
+    "feedback": "以{user_name}语气表达的个人思考和扩展"
 }}
 
-Note:
-The values in the JSON output must be provided in {preferred_language}."""
+注意：JSON输出中的值必须使用{preferred_language}提供。
+"""
 
-fine_grained_prompt_c = """You are {user_name}‘s most considerate assistant.
-Your life’s most important goal is to ensure that {user_name}’s requests are perfectly resolved by experts with your assistance.
+fine_grained_prompt_c = """你是{user_name}最体贴的助手。
+你人生最重要的目标是确保在您的协助下，专家能完美解决{user_name}提出的请求。
 
-Your current task is to examine {user_name}‘s requirements, the expert’s responses to those requirements, and the related records of {user_name} to identify additional questions or topics for further exploration and deepening. Then, assist in resolving these issues.
+你当前的任务是检查{user_name}的需求、专家对这些需求的回应以及{user_name}的相关记录，找出需要进一步探索和深化的问题或主题，然后帮助解决这些问题。
 
-User’s Request: {user_request}
-Expert’s Response to the User: {expert_response}
+用户请求：{user_request}
+专家对用户的回应：{expert_response}
 
-Below are the related records of {user_name} that you have learned about:
+以下是您了解到的{user_name}的相关记录：
 {related_notes}
 
-You need to complete the task according to the following steps:
-	1.	Combine {user_name}‘s requirements, the expert’s response, and {user_name}’s relevant records to identify directions for further exploration and deepening that are relevant to {user_name}’s initial request.
-	2.	On behalf of {user_name} and based on the directions identified in step one, articulate specific and relevant questions in the voice of {user_name}.
-Please note that the further exploration should be based on {user_name}’s initial request.
+你需要按照以下步骤完成任务：
+	1.	结合{user_name}的需求、专家回应和{user_name}的相关记录，找出与{user_name}初始请求相关的进一步探索和深化方向
+	2.	代表{user_name}并基于第一步确定的方向，以{user_name}的口吻提出具体且相关的问题
+请注意，进一步探索应基于{user_name}的初始请求
 
-Your response should be provided in the following JSON format:
+你的回应应采用以下JSON格式：
 {{
-    "direction": "The direction for further exploration and inquiry",
-    "feedback": "Further exploratory and in-depth questions posed in the voice of the user"
+    "direction": "进一步探索和询问的方向",
+    "feedback": "以用户口吻提出的进一步探索性和深入性问题"
 }}
 
-Note: The values in the JSON output must be provided in {preferred_language}."""
+注意：JSON输出中的值必须使用{preferred_language}提供。
+"""

@@ -54,7 +54,7 @@ class ContextGenerator:
     Generates context data by processing notes and creating enhanced content.
     """
 
-    def __init__(self, preferred_language: str = "English", user_name: str = "", user_bio: str = ""):
+    def __init__(self, preferred_language: str = "Chinese", user_name: str = "", user_bio: str = ""):
         """
         Initialize the ContextGenerator with user preferences and configuration.
         
@@ -130,7 +130,7 @@ class ContextGenerator:
         Returns:
             A formatted string representing the note
         """
-        if self.preferred_language == "English":
+        if self.preferred_language == "中文":
             return f"Note:\nTitle: {note_json['title'] or ''}\nContent: {note_json['content'] or ''}\nKey Points: {note_json['insight'] or ''}\n"
         else:
             return f"Note:\nTitle: {note_json['title'] or ''}\nContent: {note_json['content'] or ''}\nKey Points: {note_json['insight'] or ''}\n"

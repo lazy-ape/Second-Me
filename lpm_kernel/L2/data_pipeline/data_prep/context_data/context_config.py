@@ -8,49 +8,49 @@ max_needs_count: int = 3
 enc = encoding_for_model("gpt-4")
 
 needs_dict: Dict[str, List[Dict[str, str]]] = {
-    "Survival Needs": [
-        {"Information Access": "Obtain basic living information such as weather, traffic, news, etc."}, 
-        {"Shopping and Consumption": "Purchase daily necessities, clothing, electronic products, etc."},
-        {"Service Appointments": "Order takeout, call for transportation, schedule repairs, etc."}
+    "生存需求": [
+        {"信息获取": "获取天气、交通、新闻等基本生活信息"}, 
+        {"购物消费": "购买日用品、服装、电子产品等"},
+        {"服务预约": "订外卖、叫车、预约维修等"}
     ],
-    "Safety Needs": [
-        {"Privacy Protection": "Protect personal information and data security."},
-        {"Financial Security": "Security of online banking and investment platforms."},
-        {"Health Support": "Online medical consultation and health monitoring services."},
-        {"Knowledge Learning": "Obtain reliable information and skills to cope with career and life uncertainties."}
+    "安全需求": [
+        {"隐私保护": "保护个人信息和数据安全"},
+        {"财务安全": "网上银行和投资平台的安全保障"},
+        {"健康支持": "在线医疗咨询和健康监测服务"},
+        {"知识学习": "获取可靠信息和技能以应对职业和生活不确定性"}
     ],
-    "Social Needs": [
-        {"Social Interaction": "Connect with others through social media and instant messaging software."},
-        {"Expression and Sharing": "Share life, emotions, or opinions through moments, blogs, videos."},
-        {"Group Belonging": "Join online communities, interest groups, forums, and interact with like-minded people."}
+    "社交需求": [
+        {"社交互动": "通过社交媒体和即时通讯软件与他人联系"},
+        {"表达分享": "通过朋友圈、博客、视频分享生活、情感或观点"},
+        {"群体归属": "加入网络社区、兴趣小组、论坛，与志同道合的人互动"}
     ],
-    "Esteem Needs": [
-        {"Recognition and Achievement": "Gain likes, comments, followers through high-quality content creation (such as short videos, live broadcasts)."},
-        {"Personal Brand Building": "Showcase professional capabilities through professional networks (such as LinkedIn) or blogs."},
-        {"Authoritative Information Release": "Become an opinion leader or authoritative voice in a specific field."}
+    "respect需求": [
+        {"认可成就": "通过高质量内容创作(如短视频、直播)获得点赞、评论、粉丝"},
+        {"个人品牌建设": "通过专业网络(如LinkedIn)或博客展示专业能力"},
+        {"权威信息发布": "成为特定领域的意见领袖或权威声音"}
     ],
-    "Self-Actualization Needs": [
-        {"Learning and Growth": "Continuously improve oneself through online courses, e-books, knowledge sharing platforms."},
-        {"Creative Expression": "Create text, video, music, art and other works on platforms."},
-        {"Exploration and Innovation": "Discover new interests, try new technologies (such as AR, VR)."}
+    "自我实现需求": [
+        {"学习成长": "通过在线课程、电子书、知识分享平台不断提升自我"},
+        {"创意表达": "在平台上创作文字、视频、音乐、艺术等作品"},
+        {"探索创新": "发现新兴趣，尝试新技术(如AR、VR)"}
     ],
-    "Entertainment and Relaxation Needs": [
-        {"Content Consumption": "Watch videos, listen to music, read novels, etc."},
-        {"Interactive Entertainment": "Play games, participate in live broadcast interactions."},
-        {"Relaxation Experience": "Use meditation, sleep, mental health applications."}
+    "娱乐休闲需求": [
+        {"内容消费": "观看视频、听音乐、阅读小说等"},
+        {"互动娱乐": "玩游戏、参与直播互动"},
+        {"放松体验": "使用冥想、睡眠、心理健康应用"}
     ],
-    "Transaction and Business Needs": [
-        {"Online Transactions": "E-commerce shopping, payment transfers."},
-        {"Promotion and Marketing": "Promote products or services through advertising, SEO optimization, social media."},
-        {"Career and Collaboration": "Find job opportunities, online interviews, cooperation between enterprises."}
+    "交易商务需求": [
+        {"在线交易": "电商购物、支付转账"},
+        {"推广营销": "通过广告、SEO优化、社交媒体推广产品或服务"},
+        {"职业协作": "寻找工作机会、线上面试、企业间合作"}
     ],
-    "Exploration and Curiosity Needs": [
-        {"Knowledge Acquisition": "Search encyclopedias, watch popular science videos, participate in Q&A communities."},
-        {"Discovering New Things": "Learn about the latest developments through algorithm recommendations and hot lists."},
+    "探索好奇需求": [
+        {"知识获取": "搜索百科、观看科普视频、参与问答社区"},
+        {"发现新事物": "通过算法推荐和热榜了解最新动态"},
     ],
-    "Belonging and Ritual Needs": [
-        {"Digital Identity": "Create and maintain online identities, such as avatars, nicknames, signatures, etc."},
-        {"Cultural Participation": "Participate in trending discussions, festival celebrations, major event commemorative activities."},
-        {"Virtual Space Belonging": "Have personal 'space' on metaverse or virtual social platforms."}
+    "归属仪式需求": [
+        {"数字身份": "创建和维护在线身份，如头像、昵称、签名等"},
+        {"文化参与": "参与趋势讨论、节日庆祝、重大事件纪念活动"},
+        {"虚拟空间归属": "在元宇宙或虚拟社交平台拥有个人'空间'"}
     ]
 }

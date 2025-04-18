@@ -15,7 +15,7 @@ logger = get_train_process_logger()
 
 class StatusBioGenerator:
     def __init__(self):
-        self.preferred_language = "English"
+        self.preferred_language = "Chinese"
         self.model_params = {
             "temperature": 0,
             "max_tokens": 1000,

@@ -30,7 +30,7 @@ from lpm_kernel.configs.logging import get_train_process_logger
 logger = get_train_process_logger()
 
 class L0Generator:
-    def __init__(self, preferred_language="English"):
+    def __init__(self, preferred_language="Chinese"):
         """Initialize L0Generator with language preference.
         
         Args:
@@ -107,7 +107,7 @@ class L0Generator:
                 )
 
             # system prompt
-            language = language_desc if i != 0 else "English"
+            language = language_desc if i != 0 else "Chinese"
 
             messages = [
                 {"role": "system", "content": image_parser_prompt},
