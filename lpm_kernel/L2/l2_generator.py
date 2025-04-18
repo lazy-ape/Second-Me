@@ -29,7 +29,7 @@ class L2Generator:
         data_processor: Instance of L2DataProcessor for handling data processing.
     """
 
-    def __init__(self, data_path: str = "../raw_data", preferred_lang: str = "English", is_cot: bool = True):
+    def __init__(self, data_path: str = "../raw_data", preferred_lang: str = "Chinese", is_cot: bool = True):
         """Initialize the L2Generator with data path and preferred language.
         
         Args:

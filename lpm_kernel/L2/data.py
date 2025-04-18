@@ -51,7 +51,7 @@ class L2DataProcessor:
     def __init__(
             self,
             data_path: str = "resources/L2/data_pipeline/raw_data",
-            preferred_lang: str = "English",
+            preferred_lang: str = "Chinese",
     ):
         """Initialize the L2DataProcessor.
         
